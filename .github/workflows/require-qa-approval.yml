@@ -1,0 +1,22 @@
+﻿name: Require QA Approval
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+jobs:
+  require-qa-approved:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for "qa approved" label
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const labels = pr.labels.map(label => label.name.toLowerCase());
+            if (!labels.includes("qa approved")) {
+              core.setFailed('PR is missing the required "qa approved" label.');
+            } else {
+              core.notice('✅ PR has the required "qa approved" label.');
+            }
